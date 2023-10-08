@@ -1,12 +1,12 @@
 ﻿using BepInEx;
 using BepInEx.Logging;
 using HarmonyLib;
-using PressureVessel.Items.Equipment;
 using System.Reflection;
+using xale.Subnautica.PressureVessel.Items.Equipment;
 
-namespace PressureVessel
+namespace xale.Subnautica.PressureVessel
 {
-    [BepInPlugin(PluginInfo.PLUGIN_GUID, PluginInfo.PLUGIN_NAME, PluginInfo.PLUGIN_VERSION)]
+    [BepInPlugin(MyPluginInfo.PLUGIN_GUID, MyPluginInfo.PLUGIN_NAME, MyPluginInfo.PLUGIN_VERSION)]
     [BepInDependency("com.snmodding.nautilus")]
     public class Plugin : BaseUnityPlugin
     {
@@ -23,8 +23,8 @@ namespace PressureVessel
             InitializePrefabs();
 
             // register harmony patches, if there are any
-            Harmony.CreateAndPatchAll(Assembly, $"{PluginInfo.PLUGIN_GUID}");
-            Logger.LogInfo($"Plugin {PluginInfo.PLUGIN_GUID} is loaded!");
+            Harmony.CreateAndPatchAll(Assembly, $"{MyPluginInfo.PLUGIN_GUID}");
+            Logger.LogInfo($"Plugin {MyPluginInfo.PLUGIN_GUID} is loaded!");
         }
 
         private void InitializePrefabs()

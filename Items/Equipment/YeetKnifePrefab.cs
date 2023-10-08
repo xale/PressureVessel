@@ -6,7 +6,7 @@ using Nautilus.Extensions;
 using UnityEngine;
 using Ingredient = CraftData.Ingredient;
 
-namespace PressureVessel.Items.Equipment
+namespace xale.Subnautica.PressureVessel.Items.Equipment
 {
     public static class YeetKnifePrefab
     {
