@@ -1,7 +1,9 @@
 ﻿using BepInEx;
 using BepInEx.Logging;
+using BepInEx.Configuration;
 using HarmonyLib;
 using System.Reflection;
+using xale.Subnautica.PressureVessel.Config;
 
 namespace xale.Subnautica.PressureVessel;
 
@@ -11,12 +13,20 @@ public class PressureVessel : BaseUnityPlugin
 {
     public new static ManualLogSource Logger { get; private set; }
 
+    public new static ConfigFile Config { get; private set; }
+
     private static Assembly Assembly { get; } = Assembly.GetExecutingAssembly();
 
     private void Awake()
     {
-        // set project-scoped logger instance
         Logger = base.Logger;
+        Config = base.Config;
+
+        // Install internal configuration settings.
+        PressureVesselConfig.Initialize();
+
+        // Preload settings menu.
+        PressureVesselOptions.get();
 
         // register harmony patches, if there are any
         Harmony.CreateAndPatchAll(Assembly, $"{MyPluginInfo.PLUGIN_GUID}");
