@@ -7,8 +7,9 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <LangVersion>11</LangVersion>
 	<RootNamespace>xale.Subnautica.PressureVessel</RootNamespace>
+	<BepInExPluginGuid>xale.Subnautica.PressureVessel</BepInExPluginGuid>
 
-    <RestoreAdditionalProjectSources>
+	<RestoreAdditionalProjectSources>
       https://api.nuget.org/v3/index.json;
       https://nuget.bepinex.dev/v3/index.json;
     </RestoreAdditionalProjectSources>
