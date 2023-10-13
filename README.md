@@ -6,7 +6,7 @@ Subnautica, a game about exploring the depths of an ocean-covered alien planet, 
 
 This is understandable given the limitations imposed by the game's vehicles, which, while useful for many things, can't be used for everything: they cannot perform scans alien flora and fauna, explore tight caves and passageways, or be used for the construction of habitats.
 
-...but what if you didn't have to?
+...but what if they could?
 
 This mod aims to enhance the capabilities of the vehicles to the point where the exploration of the deepest parts of planet 4546B can be conducted the same way it is on earth: using _only_ pressure-sealed suits, submersibles, and habitats.
 
