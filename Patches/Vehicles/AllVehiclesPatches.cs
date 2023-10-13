@@ -1,6 +1,4 @@
-﻿using BepInEx.Logging;
-using HarmonyLib;
-using System;
+﻿using HarmonyLib;
 using xale.Subnautica.PressureVessel.Config;
 
 namespace xale.Subnautica.PressureVessel.Patches.Vehicles;
