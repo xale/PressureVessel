@@ -7,7 +7,7 @@ namespace xale.Subnautica.PressureVessel.Patches.Vehicles;
 internal static class AllVehiclesPatches
 {
     [HarmonyPatch(nameof(Vehicle.GetAllowedToEject)), HarmonyPostfix]
-    static bool GetAllowedToEject_Postfix(bool originalResult, Vehicle __instance)
+    internal static bool GetAllowedToEject_Postfix(bool originalResult, Vehicle __instance)
     {
         ErrorMessage.AddDebug($"GetAllowedToEject_Postfix; originalResult: ${originalResult}");
 
