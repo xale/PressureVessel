@@ -18,4 +18,11 @@ internal class PressureVesselConfig
             key: "Safe depth",
             defaultValue: 200,
             description: "Maximum unassisted diving depth.");
+
+    public static ConfigEntry<bool> EnableDebugMessages { get; } =
+        Config.Bind(
+            section: "Default",
+            key: "Enable debug messages",
+            defaultValue: true,
+            description: "Show debugging info to player.");
 }
