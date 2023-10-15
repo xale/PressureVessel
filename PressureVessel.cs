@@ -4,6 +4,7 @@ using BepInEx.Configuration;
 using HarmonyLib;
 using System.Reflection;
 using xale.Subnautica.PressureVessel.Config;
+using xale.Subnautica.PressureVessel.Craftables;
 
 namespace xale.Subnautica.PressureVessel;
 
@@ -28,8 +29,11 @@ public class PressureVessel : BaseUnityPlugin
         // Preload settings menu.
         PressureVesselOptions.get();
 
-        // register harmony patches, if there are any
+        // Install all added craftable items.
+        Craftables.Craftables.RegisterAll();
+
         Harmony.CreateAndPatchAll(Assembly, $"{MyPluginInfo.PLUGIN_GUID}");
+
         Logger.LogInfo($"Plugin {MyPluginInfo.PLUGIN_GUID} is loaded!");
     }
 }
