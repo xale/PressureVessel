@@ -14,5 +14,6 @@ internal static class Craftables
     public static void RegisterAll()
     {
         HabitatBuilderModule.Register();
+        ScannerModule.Register();
     }
 }
