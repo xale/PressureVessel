@@ -43,6 +43,15 @@ internal class PlayerPatches
         {
             DebugMessages.Show("keyDown: openVehicleModulesKey");
             currentVehicle.upgradesInput.OpenFromExternal();
+            return;
+        }
+
+        if (GameInput.GetButtonDown(GameInput.Button.Reload))
+        {
+            DebugMessages.Show("keyDown: reload");
+            DebugMessages.Show(
+                $"energyMixins count: ${currentVehicle.energyInterface.sources.Length}");
+            currentVehicle.energyInterface.sources[0].InitiateReload();
         }
     }
 
