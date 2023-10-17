@@ -19,11 +19,6 @@ internal class PressureVesselOptions : ConfigFile
         return INSTANCE;
     }
 
-    [Toggle(
-        "Lock hatches",
-        Tooltip = "If checked, you cannot leave a vehicle or habitat below safe diving depth")]
-    public bool lockHatches = true;
-
     [Keybind(
         "Open vehicle inventory",
         Tooltip = "Opens the inventory of the vehicle you are currently piloting")]

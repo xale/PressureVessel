@@ -14,7 +14,7 @@ internal static class AllVehiclesPatches
         // If the player isn't allowed to exit anyway, there's no need for further checks.
         if (originalResult == false) { return false; }
 
-        bool lockHatches = PressureVesselOptions.get().lockHatches;
+        bool lockHatches = PressureVesselConfig.LockHatches.Value;
         DebugMessages.Show($"lockHatches: {lockHatches}");
 
         if (!lockHatches) { return true; }

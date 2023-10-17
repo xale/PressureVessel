@@ -25,4 +25,11 @@ internal class PressureVesselConfig
             key: "Enable debug messages",
             defaultValue: true,
             description: "Show debugging info to player.");
+
+    public static ConfigEntry<bool> LockHatches { get; } =
+        Config.Bind(
+            section: "Default",
+            key: "Lock hatches",
+            defaultValue: true,
+            description: "Disallow exiting vehicles at depth");
 }
