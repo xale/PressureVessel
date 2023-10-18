@@ -13,6 +13,7 @@ internal class DebugMessages
     {
         if (PressureVesselConfig.EnableDebugMessages.Value)
         {
+            PressureVessel.Logger.LogDebug(message);
             ErrorMessage.AddDebug(message);
         }
     }
