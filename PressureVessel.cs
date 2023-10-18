@@ -5,6 +5,7 @@ using HarmonyLib;
 using System.Reflection;
 using xale.Subnautica.PressureVessel.Config;
 using xale.Subnautica.PressureVessel.Craftables;
+using xale.Subnautica.PressureVessel.Behaviours;
 
 namespace xale.Subnautica.PressureVessel;
 
@@ -31,6 +32,9 @@ public class PressureVessel : BaseUnityPlugin
 
         // Install all added craftable items.
         Craftables.Craftables.RegisterAll();
+
+        // Install the custom ROV prefab.
+        ROV.RegisterPrefab();
 
         Harmony.CreateAndPatchAll(Assembly, $"{MyPluginInfo.PLUGIN_GUID}");
 
