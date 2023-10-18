@@ -1,6 +1,8 @@
 ﻿using HarmonyLib;
 using System.Collections.Generic;
 using UnityEngine;
+using UWE;
+using xale.Subnautica.PressureVessel.Behaviours;
 using xale.Subnautica.PressureVessel.Config;
 
 namespace xale.Subnautica.PressureVessel.Patches;
@@ -12,6 +14,14 @@ internal class PlayerPatches
     public static void Update_Postfix(Player __instance)
     {
         if (!AvatarInputHandler.main.IsEnabled()) { return; }
+
+        // TODO(xale): launch ROV using vehicle module
+        if (Input.GetKeyDown(KeyCode.P))
+        {
+            DebugMessages.Show("keyDown: spawn ROV");
+            CoroutineHost.StartCoroutine(ROV.SpawnAndControl());
+            return;
+        }
 
         Vehicle currentVehicle = __instance.currentMountedVehicle;
 
