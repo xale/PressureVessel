@@ -15,14 +15,6 @@ internal class PlayerPatches
     {
         if (!AvatarInputHandler.main.IsEnabled()) { return; }
 
-        // TODO(xale): launch ROV using vehicle module
-        if (Input.GetKeyDown(KeyCode.P))
-        {
-            DebugMessages.Show("keyDown: spawn ROV");
-            CoroutineHost.StartCoroutine(ROV.SpawnAndControl());
-            return;
-        }
-
         Vehicle currentVehicle = __instance.currentMountedVehicle;
 
         if (currentVehicle == null || currentVehicle.ignoreInput) { return; }

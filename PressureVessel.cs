@@ -33,9 +33,6 @@ public class PressureVessel : BaseUnityPlugin
         // Install all added craftable items.
         Craftables.Craftables.RegisterAll();
 
-        // Install the custom ROV prefab.
-        ROV.RegisterPrefab();
-
         Harmony.CreateAndPatchAll(Assembly, $"{MyPluginInfo.PLUGIN_GUID}");
 
         Logger.LogInfo($"Plugin {MyPluginInfo.PLUGIN_GUID} is loaded!");

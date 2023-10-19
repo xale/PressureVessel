@@ -4,6 +4,7 @@ using Nautilus.Assets.PrefabTemplates;
 using Nautilus.Extensions;
 using System.Collections;
 using UnityEngine;
+using UWE;
 
 namespace xale.Subnautica.PressureVessel.Behaviours;
 
@@ -13,32 +14,36 @@ internal class ROV : MapRoomCamera
 
     internal static void RegisterPrefab()
     {
-        CustomPrefab rovPrefab =
-            new CustomPrefab("ROV", "RemOra Drone", "Remotely-operated utility drone.");
-        rov = rovPrefab.Info.TechType;
+        PrefabInfo prefabInfo =
+            PrefabInfo.WithTechType(
+               "ROV", "RemOra Drone", "Remotely-operated utility drone.")
+            .WithSizeInInventory(new Vector2int(2, 2))
+            .WithIcon(SpriteManager.Get(TechType.MapRoomCamera)); // TODO(xale): custom sprite
+        rov = prefabInfo.TechType;
 
-        CloneTemplate template = new CloneTemplate(rovPrefab.Info, TechType.MapRoomCamera);
+        CloneTemplate template = new CloneTemplate(prefabInfo, TechType.MapRoomCamera);
         template.ModifyPrefab += instance =>
         {
-            instance.GetComponent<Pickupable>().isPickupable = false;
-
             MapRoomCamera baseBehavior = instance.GetComponent<MapRoomCamera>();
             instance.AddComponent<ROV>().CopyComponent(baseBehavior);
             GameObject.DestroyImmediate(baseBehavior);
 
-            // TODO(xale): configure docking point on mothership
-            instance.EnsureComponent<ROVDocking>();
             instance.EnsureComponent<DummyMapRoomScreen>();
+
+            CoroutineHost.StartCoroutine(
+                instance.GetComponent<EnergyMixin>()
+                    .SpawnDefaultAsync(1.0f, DiscardTaskResult<bool>.Instance));
         };
 
         // TODO(xale): set custom model
 
+        CustomPrefab rovPrefab = new CustomPrefab(prefabInfo);
         rovPrefab.SetGameObject(template);
 
         rovPrefab.Register();
     }
 
-    internal static IEnumerator SpawnAndControl()
+    internal static IEnumerator Spawn()
     {
         CoroutineTask<GameObject> rovPrefabLoader =
             CraftData.GetPrefabForTechTypeAsync(rov, /* verbose= */ false);
@@ -47,8 +52,6 @@ internal class ROV : MapRoomCamera
         DebugMessages.Show($"rovPrefab: ${rovPrefab}");
 
         Vector3 playerPosition = Player.main.gameObject.transform.position;
-
-        // TODO(xale): check valid spawn position
         Vector3 spawnPosition = playerPosition + new Vector3(0, 0, 3);
         DebugMessages.Show($"spawnPosition: ${spawnPosition}");
 
@@ -56,41 +59,22 @@ internal class ROV : MapRoomCamera
             Instantiate(rovPrefab, spawnPosition, Player.main.transform.rotation)
                 .GetComponent<ROV>();
         DebugMessages.Show($"rovInstance: ${rovInstance}");
-
-        // TODO(xale): configure docking point on mothership
-        rovInstance.dockingPoint = rovInstance.GetComponent<ROVDocking>();
-        DebugMessages.Show($"dockingPoint: ${rovInstance.dockingPoint}");
-
-        DebugMessages.Show($"rovInstance.CanBeControlled: ${rovInstance.CanBeControlled()}");
-
-        rovInstance.ControlCamera(rovInstance.GetComponent<DummyMapRoomScreen>());
     }
 
-    [HarmonyPatch(typeof(MapRoomCamera))]
-    internal static class MapRoomCameraRovPatches
+    internal class DummyMapRoomScreen : MapRoomScreen
     {
-        [HarmonyPatch(nameof(MapRoomCamera.UpdateEnergyRecharge)), HarmonyPrefix]
-        internal static bool UpdateEnergyRecharge_Prefix(MapRoomCamera __instance)
+        [HarmonyPatch(typeof(MapRoomScreen))]
+        internal static class MapRoomScreenDummyPatches
         {
-            DebugMessages.Show("UpdateEnergyRecharge_Prefix");
-            ROV rovInstance = (__instance as ROV);
-            DebugMessages.Show($"rovInstance: ${rovInstance}");
-            if (rovInstance == null ) { return true; } // Use default behavior for normal cameras.
-
-            // TODO(xale): consume power from mothership
-            return false;
+            [HarmonyPrefix]
+            [HarmonyPatch(nameof(MapRoomScreen.Start))]
+            [HarmonyPatch(nameof(MapRoomScreen.OnCameraFree))]
+            internal static bool DummyMethod_Prefix(MapRoomScreen __instance)
+            {
+                // Run only if this is *not* a dummy screen.
+                return (__instance.GetType() != typeof(DummyMapRoomScreen));
+            }
         }
     }
-    internal class DummyMapRoomScreen : MapRoomScreen { }
 
-    [HarmonyPatch(typeof(MapRoomScreen))]
-    internal static class MapRoomScreenDummyPatches
-    {
-        [HarmonyPatch(nameof(MapRoomScreen.OnCameraFree)), HarmonyPrefix]
-        internal static bool OnCameraFree_Prefix(MapRoomScreen __instance)
-        {
-            // Run only if this is *not* a dummy screen.
-            return (__instance.GetType() != typeof(DummyMapRoomScreen));
-        }
-    }
 }

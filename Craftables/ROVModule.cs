@@ -4,6 +4,7 @@ using Nautilus.Assets.PrefabTemplates;
 using Nautilus.Crafting;
 using Nautilus.Handlers;
 using System.Collections.Generic;
+using xale.Subnautica.PressureVessel.Behaviours;
 
 namespace xale.Subnautica.PressureVessel.Craftables;
 
@@ -13,6 +14,9 @@ internal static class ROVModule
     
     public static void Register()
     {
+        // First, register the ROV itself.
+        ROV.RegisterPrefab();
+
         PrefabInfo info =
             PrefabInfo
                 .WithTechType(
@@ -36,13 +40,15 @@ internal static class ROVModule
 
         RecipeData recipe = new RecipeData()
         {
-            Ingredients = new List<CraftData.Ingredient> {
+            Ingredients = new List<CraftData.Ingredient>() {
                 new CraftData.Ingredient(TechType.ComputerChip),
-                new CraftData.Ingredient(TechType.CopperWire),
+                new CraftData.Ingredient(TechType.Battery),
+                new CraftData.Ingredient(TechType.WiringKit),
                 new CraftData.Ingredient(TechType.Glass),
-                new CraftData.Ingredient(TechType.Titanium),
+                new CraftData.Ingredient(TechType.Titanium, 3),
             },
             craftAmount = 1,
+            LinkedItems = new List<TechType>() { ROV.rov },
         };
         prefab.SetRecipe(recipe)
             .WithFabricatorType(CraftTree.Type.SeamothUpgrades)
