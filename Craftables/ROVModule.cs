@@ -4,6 +4,7 @@ using Nautilus.Assets.PrefabTemplates;
 using Nautilus.Crafting;
 using Nautilus.Handlers;
 using System.Collections.Generic;
+using UnityEngine;
 using xale.Subnautica.PressureVessel.Behaviours;
 
 namespace xale.Subnautica.PressureVessel.Craftables;
@@ -30,6 +31,32 @@ internal static class ROVModule
         prefab.SetGameObject(new CloneTemplate(info, TechType.VehicleStorageModule));
         prefab
             .SetVehicleUpgradeModule(EquipmentType.VehicleModule, QuickSlotType.Selectable)
+            .WithOnModuleAdded((Vehicle vehicle, int slotId) =>
+            {
+                SphereCollider dockingPort = vehicle.gameObject.AddComponent<SphereCollider>();
+                dockingPort.center = new Vector3(0, -1.5f, 0);
+                dockingPort.radius = 1;
+                dockingPort.isTrigger = true;
+
+                ROVDocking dockingBehavior = vehicle.gameObject.AddComponent<ROVDocking>();
+                dockingBehavior.dockingPort = dockingPort;
+                dockingBehavior.dockingTransform = dockingPort.transform;
+                dockingBehavior.undockTransform = dockingPort.transform;
+
+                // TODO(xale): add model for docking port
+                // TODO(xale): remove drone from player's inventory, if present, and dock
+            })
+            .WithOnModuleRemoved((Vehicle vehicle, int _slotId) =>
+            {
+                // TODO(xale): (beforehand:) check space in player's inventory
+                // TODO(xale): move drone, if docked, to player's inventory
+
+                ROVDocking dockingPort = vehicle.gameObject.GetComponent<ROVDocking>();
+                if (dockingPort != null) {
+                    GameObject.Destroy(dockingPort.dockingPort);
+                    GameObject.Destroy(dockingPort);
+                }
+            })
             .WithOnModuleUsed(
                 (Vehicle vehicle, int slotId, float _charge, float _chargeScalar) =>
                 {
