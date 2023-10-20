@@ -9,6 +9,12 @@ internal class ROVDocking : MapRoomCameraDocking
 
     internal GameObject releasePoint { get; set; }
 
+    // (Wrapper to clarify naming.)
+    internal void DockROV(ROV rov) { base.DockCamera(rov); }
+
+    // (Wrapper to clarify naming.)
+    internal void UndockROV() { base.UndockCamera(); }
+
     [HarmonyPatch(typeof(MapRoomCameraDocking))]
     internal static class MapRoomCameraDockingPatches
     {

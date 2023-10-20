@@ -33,28 +33,9 @@ internal static class ROVModule
             // TODO(xale): modified for debugging - revert following Nautilus fix
             .SetVehicleUpgradeModule(EquipmentType.SeamothModule, QuickSlotType.Selectable)
             //.SetVehicleUpgradeModule(EquipmentType.VehicleModule, QuickSlotType.Selectable)
-            .WithOnModuleAdded((Vehicle vehicle, int slotId) =>
+            .WithOnModuleAdded((Vehicle vehicle, int _slotId) =>
             {
-                // Create a region attached to the vehicle for the drone to dock.
-                SphereCollider dockingPort = vehicle.gameObject.AddComponent<SphereCollider>();
-                // TODO(xale): determine location based on vehicle
-                dockingPort.center = new Vector3(0, -1.5f, 0);
-                dockingPort.radius = 1;
-                dockingPort.isTrigger = true;
-
-                // TODO(xale): add model for docking port
-
-                // Create an "empty" point in front of the vehicle for releasing the drone.
-                GameObject releasePoint = new GameObject();
-                releasePoint.transform.parent = vehicle.gameObject.transform;
-                releasePoint.transform.localPosition = new Vector3(0, 0, 2);
-                releasePoint.transform.localRotation = Quaternion.identity;
-
-                ROVDocking dockingSystem = vehicle.gameObject.AddComponent<ROVDocking>();
-                dockingSystem.dockingPort = dockingPort;
-                dockingSystem.dockingTransform = dockingPort.transform;
-                dockingSystem.releasePoint = releasePoint;
-                dockingSystem.undockTransform = releasePoint.transform;
+                ConfigureROVDocking(vehicle);
 
                 // TODO(xale): remove drone from player's inventory, if present, and dock
             })
@@ -63,13 +44,7 @@ internal static class ROVModule
                 // TODO(xale): (beforehand:) check space in player's inventory
                 // TODO(xale): move drone, if docked, to player's inventory
 
-                ROVDocking dockingPort = vehicle.gameObject.GetComponent<ROVDocking>();
-                if (dockingPort != null)
-                {
-                    GameObject.Destroy(dockingPort.releasePoint);
-                    GameObject.Destroy(dockingPort.dockingPort);
-                    GameObject.Destroy(dockingPort);
-                }
+                RemoveROVDocking(vehicle);
             })
             .WithOnModuleUsed(
                 (Vehicle vehicle, int slotId, float _charge, float _chargeScalar) =>
@@ -81,7 +56,7 @@ internal static class ROVModule
                     if (dockingSystem != null && dockingSystem.camera != null)
                     {
                         // TODO(xale): check release point is clear
-                        dockingSystem.UndockCamera();
+                        dockingSystem.UndockROV();
                     }
 
                     // TODO(xale): transfer player control
@@ -110,5 +85,39 @@ internal static class ROVModule
 
         CraftDataHandler.RemoveFromGroup(TechGroup.Resources, TechCategory.BasicMaterials, rovModule);
         CraftDataHandler.AddToGroup(TechGroup.VehicleUpgrades, TechCategory.VehicleUpgrades, rovModule);
+    }
+
+    internal static void ConfigureROVDocking(Vehicle vehicle)
+    {
+        // Create a region attached to the vehicle for the drone to dock.
+        SphereCollider dockingPort = vehicle.gameObject.AddComponent<SphereCollider>();
+        // TODO(xale): determine location based on vehicle
+        dockingPort.center = new Vector3(0, -1.5f, 0);
+        dockingPort.radius = 1;
+        dockingPort.isTrigger = true;
+
+        // TODO(xale): add model for docking port
+
+        // Create an "empty" point in front of the vehicle for releasing the drone.
+        GameObject releasePoint = new GameObject();
+        releasePoint.transform.parent = vehicle.gameObject.transform;
+        releasePoint.transform.localPosition = new Vector3(0, 0, 2);
+        releasePoint.transform.localRotation = Quaternion.identity;
+
+        ROVDocking dockingSystem = vehicle.gameObject.AddComponent<ROVDocking>();
+        dockingSystem.dockingPort = dockingPort;
+        dockingSystem.dockingTransform = dockingPort.transform;
+        dockingSystem.releasePoint = releasePoint;
+        dockingSystem.undockTransform = releasePoint.transform;
+    }
+
+    internal static void RemoveROVDocking(Vehicle vehicle)
+    {
+        ROVDocking dockingPort = vehicle.gameObject.GetComponent<ROVDocking>();
+        if (dockingPort == null) { return; }
+
+        GameObject.Destroy(dockingPort.releasePoint);
+        GameObject.Destroy(dockingPort.dockingPort);
+        GameObject.Destroy(dockingPort);
     }
 }
