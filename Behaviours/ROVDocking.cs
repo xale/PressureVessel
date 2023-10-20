@@ -40,7 +40,7 @@ internal class ROVDocking : MapRoomCameraDocking
             camera.transform.localPosition = new Vector3(0, -1.5f, 0);
             camera.GetComponent<Collider>().enabled = false;
 
-            Subtitles.Add("RemOra Docked");
+            ErrorMessage.AddMessage("RemOra docked.");
         }
 
         [HarmonyPatch(nameof(MapRoomCameraDocking.UndockCamera)), HarmonyPrefix]
