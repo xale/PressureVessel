@@ -7,6 +7,8 @@ internal class ROVDocking : MapRoomCameraDocking
 {
     internal Collider dockingPort { get; set; }
 
+    internal GameObject releasePoint { get; set; }
+
     [HarmonyPatch(typeof(MapRoomCameraDocking))]
     internal static class MapRoomCameraDockingPatches
     {
@@ -31,6 +33,8 @@ internal class ROVDocking : MapRoomCameraDocking
             camera.transform.parent = __instance.dockingTransform;
             camera.transform.localPosition = new Vector3(0, -1.5f, 0);
             camera.GetComponent<Collider>().enabled = false;
+
+            Subtitles.Add("RemOra Docked");
         }
 
         [HarmonyPatch(nameof(MapRoomCameraDocking.UndockCamera)), HarmonyPrefix]
@@ -38,8 +42,9 @@ internal class ROVDocking : MapRoomCameraDocking
         {
             if (__instance.GetType() != typeof(ROVDocking)) { return; }
 
+            DebugMessages.Show("ROVDocking_UndockCamera");
+
             __instance.camera.transform.parent = null;
-            __instance.camera.transform.localPosition = Vector3.zero;
             __instance.camera.GetComponent<Collider>().enabled = true;
         }
     }
