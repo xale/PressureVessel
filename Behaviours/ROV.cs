@@ -8,7 +8,7 @@ using UWE;
 
 namespace xale.Subnautica.PressureVessel.Behaviours;
 
-internal class ROV : MapRoomCamera
+internal class ROV : MapRoomCamera, IInputHandler
 {
     public static TechType rov { get; private set; }
 
@@ -41,6 +41,29 @@ internal class ROV : MapRoomCamera
         rovPrefab.SetGameObject(template);
 
         rovPrefab.Register();
+    }
+
+    internal void Control()
+    {
+        DebugMessages.Show("ROV.Control");
+        base.ControlCamera(/* MapRoomCameraScreen= */ null);
+        InputHandlerStack.main.Push(this);
+    }
+
+    bool IInputHandler.HandleInput()
+    {
+        base.HandleInput();
+        return true;
+    }
+
+    public bool HandleLateInput()
+    {
+        return true;
+    }
+
+    public void OnFocusChanged(InputFocusMode mode)
+    {
+        // No-op.
     }
 
     internal static IEnumerator Spawn()
@@ -96,5 +119,4 @@ internal class ROV : MapRoomCamera
             }
         }
     }
-
 }
