@@ -59,7 +59,22 @@ internal static class ROVModule
                         dockingSystem.UndockROV();
                     }
 
-                    // TODO(xale): transfer player control
+                    // Check whether an ROV is available and controllable.
+                    ROV rov = dockingSystem.lastDocked;
+                    if (rov == null)
+                    {
+                        ErrorMessage.AddError("No Remoras available.");
+                        return;
+                    }
+
+                    if (!rov.CanBeControlled())
+                    {
+                        ErrorMessage.AddError(
+                            "Remora not responding - check for damage or low battery.");
+                        return;
+                    }
+
+                    rov.Control();
                 });
 
         // TODO(xale): configure prerequisites (Seamoth or Prawn)
