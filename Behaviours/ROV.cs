@@ -49,16 +49,36 @@ internal class ROV : MapRoomCamera
             CraftData.GetPrefabForTechTypeAsync(rov, /* verbose= */ false);
         yield return rovPrefabLoader;
         GameObject rovPrefab = rovPrefabLoader.GetResult();
-        DebugMessages.Show($"rovPrefab: ${rovPrefab}");
+        DebugMessages.Show($"rovPrefab: {rovPrefab}");
 
         Vector3 playerPosition = Player.main.gameObject.transform.position;
         Vector3 spawnPosition = playerPosition + new Vector3(0, 0, 3);
-        DebugMessages.Show($"spawnPosition: ${spawnPosition}");
+        DebugMessages.Show($"spawnPosition: {spawnPosition}");
 
         ROV rovInstance =
             Instantiate(rovPrefab, spawnPosition, Player.main.transform.rotation)
                 .GetComponent<ROV>();
-        DebugMessages.Show($"rovInstance: ${rovInstance}");
+        DebugMessages.Show($"rovInstance: {rovInstance}");
+    }
+
+    [HarmonyPatch(typeof(MapRoomCamera))]
+    internal class MapRoomCameraPatches
+    {
+        [HarmonyPatch(nameof(MapRoomCamera.Start)), HarmonyPostfix]
+        internal static void Start_Postfix(MapRoomCamera __instance)
+        {
+            if (__instance.GetType() != typeof(ROV)) { return; }
+
+            // Because the static initialization for MapRoomCamera is performed asynchronously,
+            // we need to wait for it to complete before we can revert it.
+            CoroutineHost.StartCoroutine(WaitAndRemoveFromScannerCameraList(__instance));
+        }
+
+        private static IEnumerator WaitAndRemoveFromScannerCameraList(MapRoomCamera camera)
+        {
+            // Keep ROVs out of the global list of scanner-room cameras.
+            yield return new WaitUntil(() => MapRoomCamera.cameras.Remove(camera));
+        }
     }
 
     internal class DummyMapRoomScreen : MapRoomScreen
