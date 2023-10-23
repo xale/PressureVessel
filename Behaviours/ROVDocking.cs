@@ -9,6 +9,8 @@ internal class ROVDocking : MapRoomCameraDocking
 
     internal GameObject releasePoint { get; set; }
 
+    internal ROV lastDocked = null;
+
     // (Wrapper to clarify naming.)
     internal void DockROV(ROV rov) { base.DockCamera(rov); }
 
@@ -40,18 +42,28 @@ internal class ROVDocking : MapRoomCameraDocking
             camera.transform.localPosition = new Vector3(0, -1.5f, 0);
             camera.GetComponent<Collider>().enabled = false;
 
+            // TODO(xale): remove player from ROV interface, if active
+
             ErrorMessage.AddMessage("RemOra docked.");
         }
 
         [HarmonyPatch(nameof(MapRoomCameraDocking.UndockCamera)), HarmonyPrefix]
         internal static void UndockCamera_Prefix(MapRoomCameraDocking __instance)
         {
-            if (__instance.GetType() != typeof(ROVDocking)) { return; }
+            ROVDocking dockingSystem = (__instance as ROVDocking);
+            if (dockingSystem == null) { return; }
 
             DebugMessages.Show("ROVDocking_UndockCamera");
 
-            __instance.camera.transform.parent = null;
-            __instance.camera.GetComponent<Collider>().enabled = true;
+            dockingSystem.camera.transform.parent = null;
+            dockingSystem.camera.GetComponent<Collider>().enabled = true;
+
+            ROV undocked = (dockingSystem.camera as ROV);
+            if (undocked == null) {
+                // Shouldn't happen, but just in case...
+                return;
+            }
+            dockingSystem.lastDocked = undocked;
         }
     }
 }
