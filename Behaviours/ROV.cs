@@ -28,8 +28,6 @@ internal class ROV : MapRoomCamera, IInputHandler
             instance.AddComponent<ROV>().CopyComponent(baseBehavior);
             GameObject.DestroyImmediate(baseBehavior);
 
-            instance.EnsureComponent<DummyMapRoomScreen>();
-
             CoroutineHost.StartCoroutine(
                 instance.GetComponent<EnergyMixin>()
                     .SpawnDefaultAsync(1.0f, DiscardTaskResult<bool>.Instance));
@@ -66,24 +64,6 @@ internal class ROV : MapRoomCamera, IInputHandler
         // No-op.
     }
 
-    internal static IEnumerator Spawn()
-    {
-        CoroutineTask<GameObject> rovPrefabLoader =
-            CraftData.GetPrefabForTechTypeAsync(rov, /* verbose= */ false);
-        yield return rovPrefabLoader;
-        GameObject rovPrefab = rovPrefabLoader.GetResult();
-        DebugMessages.Show($"rovPrefab: {rovPrefab}");
-
-        Vector3 playerPosition = Player.main.gameObject.transform.position;
-        Vector3 spawnPosition = playerPosition + new Vector3(0, 0, 3);
-        DebugMessages.Show($"spawnPosition: {spawnPosition}");
-
-        ROV rovInstance =
-            Instantiate(rovPrefab, spawnPosition, Player.main.transform.rotation)
-                .GetComponent<ROV>();
-        DebugMessages.Show($"rovInstance: {rovInstance}");
-    }
-
     [HarmonyPatch(typeof(MapRoomCamera))]
     internal class MapRoomCameraPatches
     {
@@ -101,22 +81,6 @@ internal class ROV : MapRoomCamera, IInputHandler
         {
             // Keep ROVs out of the global list of scanner-room cameras.
             yield return new WaitUntil(() => MapRoomCamera.cameras.Remove(camera));
-        }
-    }
-
-    internal class DummyMapRoomScreen : MapRoomScreen
-    {
-        [HarmonyPatch(typeof(MapRoomScreen))]
-        internal static class MapRoomScreenDummyPatches
-        {
-            [HarmonyPrefix]
-            [HarmonyPatch(nameof(MapRoomScreen.Start))]
-            [HarmonyPatch(nameof(MapRoomScreen.OnCameraFree))]
-            internal static bool DummyMethod_Prefix(MapRoomScreen __instance)
-            {
-                // Run only if this is *not* a dummy screen.
-                return (__instance.GetType() != typeof(DummyMapRoomScreen));
-            }
         }
     }
 }

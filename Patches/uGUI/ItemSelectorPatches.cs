@@ -17,14 +17,11 @@ internal class ItemSelectorPatches
         // more than one power cell, switch to the next power cell rather than closing.
         if (GameInput.GetButtonDown(GameInput.Button.Reload))
         {
-            DebugMessages.Show("keyDown: reload");
-
             Vehicle currentVehicle = Player.main.currentMountedVehicle;
             if (currentVehicle == null) { return true; }
 
             EnergyMixin[] energySources = currentVehicle.energyInterface.sources;
             int currentIndex = Array.IndexOf(energySources, __instance.manager);
-            DebugMessages.Show($"current energySources index: ${currentIndex}");
             if (currentIndex < 0 || currentIndex == (energySources.Length - 1)) { return true; }
 
             energySources[currentIndex + 1].InitiateReload();

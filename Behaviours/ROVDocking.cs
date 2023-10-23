@@ -23,7 +23,7 @@ internal class ROVDocking : MapRoomCameraDocking
         [HarmonyPatch(nameof(MapRoomCameraDocking.Start)), HarmonyPrefix]
         internal static bool Start_Prefix(MapRoomCameraDocking __instance)
         {
-            DebugMessages.Show("ROVDocking_Start_Prefix");
+            // Run the normal startup routine only if this is *not* a modded docking system.
             return (__instance.GetType() != typeof(ROVDocking));
         }
 
@@ -33,8 +33,6 @@ internal class ROVDocking : MapRoomCameraDocking
         {
             // TODO(xale): do not allow regular camera drones to dock
             if (__instance.GetType() != typeof(ROVDocking)) { return; }
-
-            DebugMessages.Show("ROVDocking_DockCamera");
 
             // Attach the drone to the underside of the vehicle.
             // TODO(xale): use the rear for the Prawn
@@ -52,8 +50,6 @@ internal class ROVDocking : MapRoomCameraDocking
         {
             ROVDocking dockingSystem = (__instance as ROVDocking);
             if (dockingSystem == null) { return; }
-
-            DebugMessages.Show("ROVDocking_UndockCamera");
 
             dockingSystem.camera.transform.parent = null;
             dockingSystem.camera.GetComponent<Collider>().enabled = true;

@@ -1,8 +1,6 @@
 ﻿using HarmonyLib;
 using System.Collections.Generic;
 using UnityEngine;
-using UWE;
-using xale.Subnautica.PressureVessel.Behaviours;
 using xale.Subnautica.PressureVessel.Config;
 
 namespace xale.Subnautica.PressureVessel.Patches;
@@ -21,8 +19,6 @@ internal class PlayerPatches
 
         if (Input.GetKeyDown(PressureVesselOptions.get().openVehicleInventoryKey))
         {
-            DebugMessages.Show("keyDown: openVehicleInventoryKey");
-
             Exosuit prawn = (currentVehicle as Exosuit);
             if (prawn != null)
             {
@@ -37,22 +33,18 @@ internal class PlayerPatches
                 return;
             }
 
-            DebugMessages.Show($"Unknown vehicle type: ${currentVehicle}");
+            DebugMessages.Show($"Unknown vehicle type: {currentVehicle}");
             return;
         }
 
         if (Input.GetKeyDown(PressureVesselOptions.get().openVehicleModulesKey))
         {
-            DebugMessages.Show("keyDown: openVehicleModulesKey");
             currentVehicle.upgradesInput.OpenFromExternal();
             return;
         }
 
         if (GameInput.GetButtonDown(GameInput.Button.Reload))
         {
-            DebugMessages.Show("keyDown: reload");
-            DebugMessages.Show(
-                $"energyMixins count: ${currentVehicle.energyInterface.sources.Length}");
             currentVehicle.energyInterface.sources[0].InitiateReload();
         }
     }
