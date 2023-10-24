@@ -5,6 +5,7 @@ using Nautilus.Extensions;
 using System.Collections;
 using UnityEngine;
 using UWE;
+using static xale.Subnautica.PressureVessel.Behaviours.ROV.MapRoomScreenDummyPatches;
 
 namespace xale.Subnautica.PressureVessel.Behaviours;
 
@@ -65,7 +66,7 @@ internal class ROV : MapRoomCamera, IInputHandler
     }
 
     [HarmonyPatch(typeof(MapRoomCamera))]
-    internal class MapRoomCameraPatches
+    internal static class MapRoomCameraPatches
     {
         [HarmonyPatch(nameof(MapRoomCamera.Start)), HarmonyPostfix]
         internal static void Start_Postfix(MapRoomCamera __instance)
@@ -82,5 +83,26 @@ internal class ROV : MapRoomCamera, IInputHandler
             // Keep ROVs out of the global list of scanner-room cameras.
             yield return new WaitUntil(() => MapRoomCamera.cameras.Remove(camera));
         }
+
+        [HarmonyPatch(nameof(MapRoomCamera.ExitLockedMode)), HarmonyPrefix]
+        internal static void ExitLockedMode_Prefix(MapRoomCamera __instance) {
+            // Unpatched implementation expects that a MapRoomScreen is associated with the camera,
+            // and attempts to invoke a method without a null check. Provide an ephemeral dummy.
+            if (__instance.screen == null) { __instance.screen = new DummyMapRoomScreen(); }
+        }
     }
+
+    [HarmonyPatch(typeof(MapRoomScreen))]
+    internal static class MapRoomScreenDummyPatches
+    {
+        internal class DummyMapRoomScreen : MapRoomScreen { }
+
+        [HarmonyPatch(nameof(MapRoomScreen.OnCameraFree)), HarmonyPrefix]
+        internal static bool OnCameraFree_Prefix(MapRoomScreen __instance)
+        {
+            // Skip this method on dummy screen instances.
+            return (__instance.GetType() != typeof(DummyMapRoomScreen));
+        }
+    }
+
 }
