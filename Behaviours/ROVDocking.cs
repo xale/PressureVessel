@@ -32,17 +32,23 @@ internal class ROVDocking : MapRoomCameraDocking
             MapRoomCameraDocking __instance, MapRoomCamera camera)
         {
             // TODO(xale): do not allow regular camera drones to dock
+
+            // Do not interfere with normal scanner-room camera docking.
             if (__instance.GetType() != typeof(ROVDocking)) { return; }
+
+            ROV rov = (camera as ROV);
+            if (rov == null) { return; } // (Unlikely, but just in case.)
 
             // Attach the drone to the underside of the vehicle.
             // TODO(xale): use the rear for the Prawn
-            camera.transform.parent = __instance.dockingTransform;
-            camera.transform.localPosition = new Vector3(0, -1.5f, 0);
-            camera.GetComponent<Collider>().enabled = false;
+            rov.transform.parent = __instance.dockingTransform;
+            rov.transform.localPosition = new Vector3(0, -1.5f, 0);
+            rov.GetComponent<Collider>().enabled = false;
 
-            // TODO(xale): remove player from ROV interface, if active
+            // Exit ROV control, if active.
+            if (rov.active) { rov.EndControl(); }
 
-            ErrorMessage.AddMessage("RemOra docked.");
+            ErrorMessage.AddMessage("Remora docked.");
         }
 
         [HarmonyPatch(nameof(MapRoomCameraDocking.UndockCamera)), HarmonyPrefix]
