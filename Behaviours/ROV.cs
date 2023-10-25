@@ -5,6 +5,7 @@ using Nautilus.Extensions;
 using System.Collections;
 using UnityEngine;
 using UWE;
+
 using static xale.Subnautica.PressureVessel.Behaviours.ROV.MapRoomScreenDummyPatches;
 
 namespace xale.Subnautica.PressureVessel.Behaviours;
@@ -49,8 +50,35 @@ internal class ROV : MapRoomCamera, IInputHandler
         InputHandlerStack.main.Push(this);
     }
 
+    internal void EndControl()
+    {
+        InputHandlerStack.main.Pop();
+
+        base.FreeCamera();
+        uGUI_CameraDrone.main.SetCamera(null);
+        base.active = false;
+
+        Player.main.SetHeadVisible(false);
+
+        GameInput.ClearInput();
+
+        // Reset the game camera to the player's location and reenable control.
+        SNCameraRoot.main.transform.localPosition = Vector3.zero;
+        SNCameraRoot.main.transform.localRotation = Quaternion.identity;
+        MainCameraControl.main.enabled = true;
+
+    }
+
     bool IInputHandler.HandleInput()
     {
+        if (!base.active) { return false; }
+
+        if (GameInput.GetButtonDown(GameInput.Button.Exit))
+        {
+            EndControl();
+            return true;
+        }
+
         base.HandleInput();
         return true;
     }
@@ -85,7 +113,8 @@ internal class ROV : MapRoomCamera, IInputHandler
         }
 
         [HarmonyPatch(nameof(MapRoomCamera.ExitLockedMode)), HarmonyPrefix]
-        internal static void ExitLockedMode_Prefix(MapRoomCamera __instance) {
+        internal static void ExitLockedMode_Prefix(MapRoomCamera __instance)
+        {
             // Unpatched implementation expects that a MapRoomScreen is associated with the camera,
             // and attempts to invoke a method without a null check. Provide an ephemeral dummy.
             if (__instance.screen == null) { __instance.screen = new DummyMapRoomScreen(); }
