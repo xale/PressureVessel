@@ -13,7 +13,7 @@ internal class PlayerPatches
     {
         if (!AvatarInputHandler.main.IsEnabled()) { return; }
 
-        Vehicle currentVehicle = __instance.currentMountedVehicle;
+        Vehicle currentVehicle = __instance.GetVehicle();
 
         if (currentVehicle == null || currentVehicle.ignoreInput) { return; }
 
