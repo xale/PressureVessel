@@ -74,7 +74,7 @@ internal static class ROVModule
                         return;
                     }
 
-                    rov.Control();
+                    rov.Control(/* mothership= */ vehicle);
                 });
 
         // TODO(xale): configure prerequisites (Seamoth or Prawn)

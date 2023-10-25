@@ -14,6 +14,8 @@ internal class ROV : MapRoomCamera, IInputHandler
 {
     public static TechType rov { get; private set; }
 
+    internal Vehicle mothership;
+
     internal static void RegisterPrefab()
     {
         PrefabInfo prefabInfo =
@@ -43,16 +45,17 @@ internal class ROV : MapRoomCamera, IInputHandler
         rovPrefab.Register();
     }
 
-    internal void Control()
+    internal void Control(Vehicle mothership)
     {
-        DebugMessages.Show("ROV.Control");
         base.ControlCamera(/* MapRoomCameraScreen= */ null);
+        this.mothership = mothership;
         InputHandlerStack.main.Push(this);
     }
 
     internal void EndControl()
     {
         InputHandlerStack.main.Pop();
+        this.mothership = null;
 
         base.FreeCamera();
         uGUI_CameraDrone.main.SetCamera(null);
@@ -66,7 +69,6 @@ internal class ROV : MapRoomCamera, IInputHandler
         SNCameraRoot.main.transform.localPosition = Vector3.zero;
         SNCameraRoot.main.transform.localRotation = Quaternion.identity;
         MainCameraControl.main.enabled = true;
-
     }
 
     bool IInputHandler.HandleInput()
