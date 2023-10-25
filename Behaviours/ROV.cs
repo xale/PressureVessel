@@ -20,7 +20,7 @@ internal class ROV : MapRoomCamera, IInputHandler
     {
         PrefabInfo prefabInfo =
             PrefabInfo.WithTechType(
-               "ROV", "RemOra Drone", "Remotely-operated utility drone.")
+               "ROV", "Remora Drone", "Remotely-operated utility drone.")
             .WithSizeInInventory(new Vector2int(2, 2))
             .WithIcon(SpriteManager.Get(TechType.MapRoomCamera)); // TODO(xale): custom sprite
         rov = prefabInfo.TechType;
@@ -120,6 +120,22 @@ internal class ROV : MapRoomCamera, IInputHandler
             // Unpatched implementation expects that a MapRoomScreen is associated with the camera,
             // and attempts to invoke a method without a null check. Provide an ephemeral dummy.
             if (__instance.screen == null) { __instance.screen = new DummyMapRoomScreen(); }
+        }
+
+        [HarmonyPatch(nameof(MapRoomCamera.GetScreenDistance)), HarmonyPostfix]
+        internal static void GetScreenDistance_Postfix(MapRoomCamera __instance, ref float __result)
+        {
+            // Do not interfere with scanner-room cameras.
+            ROV rov = (__instance as ROV);
+            if (rov == null) { return; }
+
+            if (rov.mothership == null)
+            {
+                __result = 0f;
+                return;
+            }
+
+            __result = (rov.mothership.transform.position - rov.transform.position).magnitude;
         }
     }
 
