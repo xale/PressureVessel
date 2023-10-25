@@ -63,6 +63,7 @@ internal static class ROVModule
                     ROV rov = dockingSystem.lastDocked;
                     if (rov == null)
                     {
+                        // TODO(xale): check for an ROV nearby
                         ErrorMessage.AddError("No Remoras available.");
                         return;
                     }

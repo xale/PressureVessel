@@ -27,12 +27,21 @@ internal class ROVDocking : MapRoomCameraDocking
             return (__instance.GetType() != typeof(ROVDocking));
         }
 
+        [HarmonyPatch(nameof(MapRoomCameraDocking.DockCamera)), HarmonyPrefix]
+        internal static bool DockCamera_Prefix(
+            MapRoomCameraDocking __instance, MapRoomCamera camera)
+        {
+            // Run only if the type of camera/ROV matches the type of docking system.
+            return ((__instance.GetType() == typeof(ROVDocking))
+                        && (camera.GetType() == typeof(ROV)))
+                  || ((__instance.GetType() != typeof(ROVDocking))
+                        && (camera.GetType() != typeof(ROV)));
+        }
+
         [HarmonyPatch(nameof(MapRoomCameraDocking.DockCamera)), HarmonyPostfix]
         internal static void DockCamera_Postfix(
             MapRoomCameraDocking __instance, MapRoomCamera camera)
         {
-            // TODO(xale): do not allow regular camera drones to dock
-
             // Do not interfere with normal scanner-room camera docking.
             if (__instance.GetType() != typeof(ROVDocking)) { return; }
 
@@ -61,7 +70,8 @@ internal class ROVDocking : MapRoomCameraDocking
             dockingSystem.camera.GetComponent<Collider>().enabled = true;
 
             ROV undocked = (dockingSystem.camera as ROV);
-            if (undocked == null) {
+            if (undocked == null)
+            {
                 // Shouldn't happen, but just in case...
                 return;
             }
