@@ -47,8 +47,8 @@ internal class ROV : MapRoomCamera, IInputHandler
 
     internal void Control(Vehicle mothership)
     {
-        base.ControlCamera(/* MapRoomCameraScreen= */ null);
         this.mothership = mothership;
+        base.ControlCamera(/* MapRoomCameraScreen= */ null);
         InputHandlerStack.main.Push(this);
     }
 
