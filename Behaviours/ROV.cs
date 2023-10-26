@@ -32,6 +32,8 @@ internal class ROV : MapRoomCamera, IInputHandler
             instance.AddComponent<ROV>().CopyComponent(baseBehavior);
             GameObject.DestroyImmediate(baseBehavior);
 
+            instance.AddComponent<ROVQuickSlots>();
+
             CoroutineHost.StartCoroutine(
                 instance.GetComponent<EnergyMixin>()
                     .SpawnDefaultAsync(1.0f, DiscardTaskResult<bool>.Instance));
@@ -78,6 +80,13 @@ internal class ROV : MapRoomCamera, IInputHandler
         if (GameInput.GetButtonDown(GameInput.Button.Exit))
         {
             EndControl();
+            return true;
+        }
+
+        if (GameInput.GetButtonDown(GameInput.Button.CycleNext) ||
+            GameInput.GetButtonDown(GameInput.Button.CyclePrev))
+        {
+            // Handled by quick-slot system.
             return true;
         }
 
