@@ -1,11 +1,4 @@
-﻿using Nautilus.Assets;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace xale.Subnautica.PressureVessel.Craftables;
+﻿namespace xale.Subnautica.PressureVessel.Craftables;
 
 internal static class BeaconDropModule
 {
