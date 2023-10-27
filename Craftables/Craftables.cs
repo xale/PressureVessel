@@ -13,6 +13,7 @@ internal static class Craftables
 {
     public static void RegisterAll()
     {
+        BeaconDropModule.Register();
         HabitatBuilderModule.Register();
         ROVModule.Register();
         ScannerModule.Register();
