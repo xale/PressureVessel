@@ -1,10 +1,4 @@
-﻿using Nautilus.Assets;
-using Nautilus.Assets.Gadgets;
-using Nautilus.Assets.PrefabTemplates;
-using Nautilus.Crafting;
-using Nautilus.Handlers;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using xale.Subnautica.PressureVessel.Behaviours;
 
 namespace xale.Subnautica.PressureVessel.Craftables;
@@ -12,98 +6,45 @@ namespace xale.Subnautica.PressureVessel.Craftables;
 internal static class ROVModule
 {
     public static TechType rovModule { get; private set; }
-    
+
     public static void Register()
     {
         // First, register the ROV itself.
         ROV.RegisterPrefab();
 
-        PrefabInfo info =
-            PrefabInfo
+        rovModule =
+            VehicleModuleBuilder
                 .WithTechType(
                     "RovModule",
-                    "RemOra Drone Module",
+                    "Remora Drone Module",
                     "Deployable remotely-operated mini-submersible. Prawn/Seamoth compatible.")
-                .WithIcon(SpriteManager.Get(TechType.MapRoomCamera)); // TODO(xale): custom sprite
-        rovModule = info.TechType;
+                .SetIcon(SpriteManager.Get(TechType.MapRoomCamera)) // TODO(xale): custom sprite
+                .SetQuickSlotType(QuickSlotType.Selectable)
+                .SetRecipeIngredients(
+                    new CraftData.Ingredient(TechType.ComputerChip),
+                    new CraftData.Ingredient(TechType.Battery),
+                    new CraftData.Ingredient(TechType.WiringKit),
+                    new CraftData.Ingredient(TechType.Glass),
+                    new CraftData.Ingredient(TechType.Titanium, 3))
+                .SetLinkedItems(ROV.rov)
+                .SetFabricatorPath("CommonModules")
+                .SetCraftingTimeSeconds(7f)
+                .SetOnModuleAdded(OnAdded)
+                .SetOnModuleRemoved(OnRemoved)
+                .SetOnModuleUsed(OnUsed)
+                .RegisterAndGetTechType();
 
-        CustomPrefab prefab = new CustomPrefab(info);
-        prefab.SetGameObject(new CloneTemplate(info, TechType.VehicleStorageModule));
-        prefab
-            // TODO(xale): modified for debugging - revert following Nautilus fix
-            .SetVehicleUpgradeModule(EquipmentType.SeamothModule, QuickSlotType.Selectable)
-            //.SetVehicleUpgradeModule(EquipmentType.VehicleModule, QuickSlotType.Selectable)
-            .WithOnModuleAdded((Vehicle vehicle, int _slotId) =>
-            {
-                ConfigureROVDocking(vehicle);
-
-                // TODO(xale): remove drone from player's inventory, if present, and dock
-            })
-            .WithOnModuleRemoved((Vehicle vehicle, int _slotId) =>
-            {
-                // TODO(xale): (beforehand:) check space in player's inventory
-                // TODO(xale): move drone, if docked, to player's inventory
-
-                RemoveROVDocking(vehicle);
-            })
-            .WithOnModuleUsed(
-                (Vehicle vehicle, int slotId, float _charge, float _chargeScalar) =>
-                {
-                    DebugMessages.Show("RovModule.OnModuleUsed()");
-
-                    // If the drone is currently docked to the vehicle, release it.
-                    ROVDocking dockingSystem = vehicle.gameObject.GetComponent<ROVDocking>();
-                    if (dockingSystem != null && dockingSystem.camera != null)
-                    {
-                        // TODO(xale): check release point is clear
-                        dockingSystem.UndockROV();
-                    }
-
-                    // Check whether an ROV is available and controllable.
-                    ROV rov = dockingSystem.lastDocked;
-                    if (rov == null)
-                    {
-                        // TODO(xale): check for an ROV nearby
-                        ErrorMessage.AddError("No Remoras available.");
-                        return;
-                    }
-
-                    if (!rov.CanBeControlled())
-                    {
-                        ErrorMessage.AddError(
-                            "Remora not responding - check for damage or low battery.");
-                        return;
-                    }
-
-                    rov.Control(/* mothership= */ vehicle);
-                });
-
-        // TODO(xale): configure prerequisites (Seamoth or Prawn)
-
-        RecipeData recipe = new RecipeData()
-        {
-            Ingredients = new List<CraftData.Ingredient>() {
-                new CraftData.Ingredient(TechType.ComputerChip),
-                new CraftData.Ingredient(TechType.Battery),
-                new CraftData.Ingredient(TechType.WiringKit),
-                new CraftData.Ingredient(TechType.Glass),
-                new CraftData.Ingredient(TechType.Titanium, 3),
-            },
-            craftAmount = 1,
-            LinkedItems = new List<TechType>() { ROV.rov },
-        };
-        prefab.SetRecipe(recipe)
-            .WithFabricatorType(CraftTree.Type.SeamothUpgrades)
-            .WithStepsToFabricatorTab("CommonModules")
-            .WithCraftingTime(7f);
-
-        prefab.Register();
-
-        CraftDataHandler.RemoveFromGroup(TechGroup.Resources, TechCategory.BasicMaterials, rovModule);
-        CraftDataHandler.AddToGroup(TechGroup.VehicleUpgrades, TechCategory.VehicleUpgrades, rovModule);
+        // TODO(xale): configure prerequisites
     }
 
-    internal static void ConfigureROVDocking(Vehicle vehicle)
+    internal static void OnAdded(Vehicle vehicle, int _slotId)
+    {
+        ConfigureROVDocking(vehicle);
+
+        // TODO(xale): remove drone from player's inventory, if present, and dock
+    }
+
+    private static void ConfigureROVDocking(Vehicle vehicle)
     {
         // Create a region attached to the vehicle for the drone to dock.
         SphereCollider dockingPort = vehicle.gameObject.AddComponent<SphereCollider>();
@@ -127,7 +68,15 @@ internal static class ROVModule
         dockingSystem.undockTransform = releasePoint.transform;
     }
 
-    internal static void RemoveROVDocking(Vehicle vehicle)
+    internal static void OnRemoved(Vehicle vehicle, int _slotId)
+    {
+        // TODO(xale): (beforehand:) check space in player's inventory
+        // TODO(xale): move drone, if docked, to player's inventory
+
+        RemoveROVDocking(vehicle);
+    }
+
+    private static void RemoveROVDocking(Vehicle vehicle)
     {
         ROVDocking dockingPort = vehicle.gameObject.GetComponent<ROVDocking>();
         if (dockingPort == null) { return; }
@@ -135,5 +84,34 @@ internal static class ROVModule
         GameObject.Destroy(dockingPort.releasePoint);
         GameObject.Destroy(dockingPort.dockingPort);
         GameObject.Destroy(dockingPort);
+    }
+
+    internal static void OnUsed(Vehicle vehicle, int _slotId, float _charge, float _chargeScalar)
+    {
+        // If the drone is currently docked to the vehicle, release it.
+        ROVDocking dockingSystem = vehicle.gameObject.GetComponent<ROVDocking>();
+        if (dockingSystem != null && dockingSystem.camera != null)
+        {
+            // TODO(xale): check release point is clear
+            dockingSystem.UndockROV();
+        }
+
+        // Check whether an ROV is available and controllable.
+        ROV rov = dockingSystem.lastDocked;
+        if (rov == null)
+        {
+            // TODO(xale): check for an ROV nearby
+            ErrorMessage.AddError("No Remoras available.");
+            return;
+        }
+
+        if (!rov.CanBeControlled())
+        {
+            ErrorMessage.AddError(
+                "Remora not responding - check for damage or low battery.");
+            return;
+        }
+
+        rov.Control(/* mothership= */ vehicle);
     }
 }
